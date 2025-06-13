@@ -1,129 +1,212 @@
 ﻿Imports System.Data.SqlClient
 
 Public Class Form3
-    ' Connection String (update as needed)
-    Private ReadOnly connectionString As String = "Data Source=DIYA_S\SQLEXPRESS;Initial Catalog=AMDB;Integrated Security=True"
+    Dim con As New SqlConnection("Data Source=DIYA_S\SQLEXPRESS;Initial Catalog=AMDB;Integrated Security=True")
 
-    ' Load Products into DataGridView
-    Private Sub LoadProducts()
-        Try
-            Using connection As New SqlConnection(connectionString)
-                connection.Open()
-                Dim query As String = "SELECT * FROM Products"
-                Dim adapter As New SqlDataAdapter(query, connection)
-                Dim table As New DataTable()
-                adapter.Fill(table)
-                DataGridView1.DataSource = table
-            End Using
-        Catch ex As Exception
-            MessageBox.Show("Error: " & ex.Message)
-        End Try
-    End Sub
-
-    ' Add Product
-    Private Sub BtnAdd_Click(sender As Object, e As EventArgs) Handles BtnAdd.Click
-
-
-        If Not ValidateInputs() Then Exit Sub
-
-        Try
-            Using connection As New SqlConnection(connectionString)
-                connection.Open()
-                Dim query As String = "INSERT INTO Products (ProductName, Category, Price, StockQuantity) VALUES (@name, @category, @price, @stock)"
-                Using command As New SqlCommand(query, connection)
-                    command.Parameters.Add("@name", SqlDbType.VarChar).Value = TxtProductName.Text
-                    command.Parameters.Add("@category", SqlDbType.VarChar).Value = CmbCategory.Text
-                    command.Parameters.Add("@price", SqlDbType.Decimal).Value = Convert.ToDecimal(TxtPrice.Text)
-                    command.Parameters.Add("@stock", SqlDbType.Int).Value = Convert.ToInt32(TxtStock.Text)
-                    command.ExecuteNonQuery()
-                End Using
-                MessageBox.Show("Product Added Successfully!")
-                LoadProducts()
-            End Using
-        Catch ex As Exception
-            MessageBox.Show("Error: " & ex.Message)
-        End Try
-    End Sub
-
-    ' Update Product
-    Private Sub BtnUpdate_Click(sender As Object, e As EventArgs) Handles BtnUpdate.Click
-        If Not ValidateInputs() Then Exit Sub
-
-        Try
-            Using connection As New SqlConnection(connectionString)
-                connection.Open()
-                Dim query As String = "UPDATE Products SET ProductName=@name, Category=@category, Price=@price, StockQuantity=@stock WHERE ProductID=@id"
-                Using command As New SqlCommand(query, connection)
-                    command.Parameters.Add("@id", SqlDbType.Int).Value = Convert.ToInt32(TxtProductID.Text)
-                    command.Parameters.Add("@name", SqlDbType.VarChar).Value = TxtProductName.Text
-                    command.Parameters.Add("@category", SqlDbType.VarChar).Value = CmbCategory.Text
-                    command.Parameters.Add("@price", SqlDbType.Decimal).Value = Convert.ToDecimal(TxtPrice.Text)
-                    command.Parameters.Add("@stock", SqlDbType.Int).Value = Convert.ToInt32(TxtStock.Text)
-                    command.ExecuteNonQuery()
-                End Using
-                MessageBox.Show("Product Updated Successfully!")
-                LoadProducts()
-            End Using
-        Catch ex As Exception
-            MessageBox.Show("Error: " & ex.Message)
-        End Try
-    End Sub
-
-    ' Delete Product
-    Private Sub BtnDelete_Click(sender As Object, e As EventArgs) Handles BtnDelete.Click
-        If String.IsNullOrWhiteSpace(TxtProductID.Text) Then
-            MessageBox.Show("Please select a product to delete.")
-            Exit Sub
-        End If
-
-        Try
-            Using connection As New SqlConnection(connectionString)
-                connection.Open()
-                Dim query As String = "DELETE FROM Products WHERE ProductID=@id"
-                Using command As New SqlCommand(query, connection)
-                    command.Parameters.Add("@id", SqlDbType.Int).Value = Convert.ToInt32(TxtProductID.Text)
-                    command.ExecuteNonQuery()
-                End Using
-                MessageBox.Show("Product Deleted Successfully!")
-                LoadProducts()
-            End Using
-        Catch ex As Exception
-            MessageBox.Show("Error: " & ex.Message)
-        End Try
-    End Sub
-
-
-    ' Load Data on Form Load
     Private Sub Form3_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Button5.Visible = False
+        Button6.Visible = False
         LoadProducts()
-        CmbCategory.Items.Add("Home Appliance")
-        CmbCategory.Items.Add("Kitchen Appliance")
-        CmbCategory.Items.Add("Electronics")
-
+        LoadSuppliers()
+        LoadCategories()
+        HighlightLowStock()
+    End Sub
+    Private Sub LoadProducts()
+        Dim query As String = "SELECT ProductID, ProductName, Category, Price, StockQuantity, SupplierID FROM Products"
+        Dim adapter As New SqlDataAdapter(query, con)
+        Dim dt As New DataTable()
+        adapter.Fill(dt)
+        DataGridView1.DataSource = dt
+        HighlightLowStock()
     End Sub
 
-    ' Populate fields from DataGridView row click
-    Private Sub DataGridView1_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles DataGridView1.CellClick
-        If e.RowIndex >= 0 Then
-            Dim row As DataGridViewRow = DataGridView1.Rows(e.RowIndex)
+    Private Sub LoadSuppliers()
+        Dim query As String = "SELECT SupplierID, SupplierName FROM Supplierss"
+        Dim adapter As New SqlDataAdapter(query, con)
+        Dim dt As New DataTable()
+        adapter.Fill(dt)
+        ComboBox1.DataSource = dt
+        ComboBox1.DisplayMember = "SupplierName"
+        ComboBox1.ValueMember = "SupplierID"
+        ComboBox1.SelectedIndex = -1
+    End Sub
 
-            TxtProductID.Text = If(row.Cells("ProductID").Value IsNot DBNull.Value, row.Cells("ProductID").Value.ToString(), "")
-            TxtProductName.Text = If(row.Cells("ProductName").Value IsNot DBNull.Value, row.Cells("ProductName").Value.ToString(), "")
-            CmbCategory.Text = If(row.Cells("Category").Value IsNot DBNull.Value, row.Cells("Category").Value.ToString(), "")
-            TxtPrice.Text = If(row.Cells("Price").Value IsNot DBNull.Value, row.Cells("Price").Value.ToString(), "")
-            TxtStock.Text = If(row.Cells("StockQuantity").Value IsNot DBNull.Value, row.Cells("StockQuantity").Value.ToString(), "")
+    Private Sub LoadCategories()
+        ComboBox2.Items.Clear()
+        Dim query As String = "SELECT DISTINCT Category FROM Products"
+        Dim cmd As New SqlCommand(query, con)
+        con.Open()
+        Dim reader As SqlDataReader = cmd.ExecuteReader()
+        While reader.Read()
+            ComboBox2.Items.Add(reader("Category").ToString())
+        End While
+        reader.Close()
+        con.Close()
+        ComboBox2.SelectedIndex = -1
+    End Sub
+
+    Private Sub HighlightLowStock()
+        For Each row As DataGridViewRow In DataGridView1.Rows
+            If Not row.IsNewRow AndAlso Convert.ToInt32(row.Cells("StockQuantity").Value) < 5 Then
+                row.DefaultCellStyle.BackColor = Color.MistyRose
+                row.DefaultCellStyle.ForeColor = Color.Red
+            Else
+                row.DefaultCellStyle.BackColor = Color.White
+                row.DefaultCellStyle.ForeColor = Color.Black
+            End If
+        Next
+    End Sub
+
+    Private Sub ClearFields()
+        TextBox1.Clear()
+        ComboBox1.SelectedIndex = -1
+        TextBox2.Clear()
+        ComboBox2.SelectedIndex = -1
+        TextBox3.Clear()
+        TextBox4.Clear()
+    End Sub
+
+    ' ADD
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        If ComboBox1.SelectedIndex = -1 OrElse TextBox2.Text = "" OrElse ComboBox2.Text = "" OrElse TextBox3.Text = "" OrElse TextBox4.Text = "" Then
+            MessageBox.Show("Please fill all fields.", "Missing Data", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Return
+        End If
+
+        Dim query As String = "INSERT INTO Products (ProductName, Category, Price, StockQuantity, SupplierID) VALUES (@name, @category, @price, @stock, @supplierID)"
+        Dim cmd As New SqlCommand(query, con)
+        cmd.Parameters.AddWithValue("@name", TextBox2.Text)
+        cmd.Parameters.AddWithValue("@category", ComboBox2.Text)
+        cmd.Parameters.AddWithValue("@price", Convert.ToDecimal(TextBox3.Text))
+        cmd.Parameters.AddWithValue("@stock", Convert.ToInt32(TextBox4.Text))
+        cmd.Parameters.AddWithValue("@supplierID", Convert.ToInt32(ComboBox1.SelectedValue))
+
+        con.Open()
+        cmd.ExecuteNonQuery()
+        con.Close()
+
+        MessageBox.Show("Product added successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information)
+        LoadProducts()
+        LoadCategories()
+        ClearFields()
+    End Sub
+
+    ' AUTO-FILL ON PRODUCT ID CHANGE
+    Private Sub TextBox1_TextChanged(sender As Object, e As EventArgs) Handles TextBox1.TextChanged
+        If TextBox1.Text.Trim() = "" Then
+            ClearFields()
+            Return
+        End If
+
+        Dim productID As Integer
+        If Integer.TryParse(TextBox1.Text.Trim(), productID) Then
+            Dim query As String = "SELECT * FROM Products WHERE ProductID = @id"
+            Dim cmd As New SqlCommand(query, con)
+            cmd.Parameters.AddWithValue("@id", productID)
+
+            Dim dt As New DataTable()
+            Dim adapter As New SqlDataAdapter(cmd)
+            adapter.Fill(dt)
+
+            If dt.Rows.Count > 0 Then
+                Dim row As DataRow = dt.Rows(0)
+                TextBox2.Text = row("ProductName").ToString()
+                ComboBox2.Text = row("Category").ToString()
+                TextBox3.Text = row("Price").ToString()
+                TextBox4.Text = row("StockQuantity").ToString()
+                ComboBox1.SelectedValue = row("SupplierID")
+            Else
+                TextBox2.Clear()
+                ComboBox2.SelectedIndex = -1
+                TextBox3.Clear()
+                TextBox4.Clear()
+                ComboBox1.SelectedIndex = -1
+            End If
         End If
     End Sub
 
-    ' Input Validation Helper
-    Private Function ValidateInputs() As Boolean
-        If String.IsNullOrWhiteSpace(TxtProductName.Text) OrElse
-           String.IsNullOrWhiteSpace(CmbCategory.Text) OrElse
-           Not Decimal.TryParse(TxtPrice.Text, Nothing) OrElse
-           Not Integer.TryParse(TxtStock.Text, Nothing) Then
-            MessageBox.Show("Please enter valid product details.")
-            Return False
+    ' EDIT
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+        If TextBox1.Text = "" OrElse TextBox2.Text = "" OrElse ComboBox2.Text = "" OrElse TextBox3.Text = "" OrElse TextBox4.Text = "" OrElse ComboBox1.SelectedIndex = -1 Then
+            MessageBox.Show("Please enter Product ID and fill all fields.", "Missing Data", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            Return
         End If
-        Return True
-    End Function
+
+        Dim query As String = "UPDATE Products SET ProductName = @name, Category = @category, Price = @price, StockQuantity = @stock, SupplierID = @supplierID WHERE ProductID = @id"
+        Dim cmd As New SqlCommand(query, con)
+        cmd.Parameters.AddWithValue("@name", TextBox2.Text)
+        cmd.Parameters.AddWithValue("@category", ComboBox2.Text)
+        cmd.Parameters.AddWithValue("@price", Convert.ToDecimal(TextBox3.Text))
+        cmd.Parameters.AddWithValue("@stock", Convert.ToInt32(TextBox4.Text))
+        cmd.Parameters.AddWithValue("@supplierID", Convert.ToInt32(ComboBox1.SelectedValue))
+        cmd.Parameters.AddWithValue("@id", Convert.ToInt32(TextBox1.Text))
+
+        con.Open()
+        Dim rowsAffected = cmd.ExecuteNonQuery()
+        con.Close()
+
+        If rowsAffected > 0 Then
+            MessageBox.Show("Product updated successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            LoadProducts()
+            LoadCategories()
+            ClearFields()
+        Else
+            MessageBox.Show("Product ID not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End If
+    End Sub
+
+
+
+    ' CLEAR
+    Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
+        ClearFields()
+    End Sub
+
+    ' SEARCH (BUTTON)
+    Private Sub Button5_Click(sender As Object, e As EventArgs) Handles Button5.Click
+
+        Dim query As String = "SELECT * FROM Products WHERE ProductName LIKE @search OR Category LIKE @search"
+        Dim adapter As New SqlDataAdapter(query, con)
+        adapter.SelectCommand.Parameters.AddWithValue("@search", "%" & TextBox5.Text & "%")
+        Dim dt As New DataTable()
+        adapter.Fill(dt)
+        DataGridView1.DataSource = dt
+        HighlightLowStock()
+    End Sub
+
+    ' LIVE SEARCH
+    Private Sub TextBox5_TextChanged(sender As Object, e As EventArgs) Handles TextBox5.TextChanged
+        Dim query As String = "SELECT * FROM Products WHERE ProductName LIKE @search OR Category LIKE @search"
+        Dim adapter As New SqlDataAdapter(query, con)
+        adapter.SelectCommand.Parameters.AddWithValue("@search", "%" & TextBox5.Text & "%")
+        Dim dt As New DataTable()
+        adapter.Fill(dt)
+        DataGridView1.DataSource = dt
+        HighlightLowStock()
+    End Sub
+
+    ' RESET SEARCH
+    Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
+        TextBox5.Text = ""
+        LoadProducts()
+        HighlightLowStock()
+    End Sub
+
+    ' BACK
+    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
+        Me.Hide()
+
+        If Module1.LoggedInRole = "Admin" Then
+            form2.Show()
+        ElseIf Module1.LoggedInRole.ToLower() = "staff" Then
+            Form9.Show()
+        Else
+            MessageBox.Show("Unknown user role. Cannot navigate.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Me.Show()
+        End If
+    End Sub
+
+    Private Sub PictureBox1_Click(sender As Object, e As EventArgs) Handles PictureBox1.Click
+
+    End Sub
 End Class

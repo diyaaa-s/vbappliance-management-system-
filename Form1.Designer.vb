@@ -31,6 +31,9 @@ Partial Class Form1
         Button1 = New Button()
         Button2 = New Button()
         PictureBox1 = New PictureBox()
+        CheckBox1 = New CheckBox()
+        RadioButton1 = New RadioButton()
+        RadioButton2 = New RadioButton()
         CType(PictureBox1, ComponentModel.ISupportInitialize).BeginInit()
         SuspendLayout()
         ' 
@@ -89,7 +92,7 @@ Partial Class Form1
         ' 
         Button1.BackColor = SystemColors.GradientActiveCaption
         Button1.Font = New Font("Stencil", 10.2F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
-        Button1.Location = New Point(761, 532)
+        Button1.Location = New Point(871, 563)
         Button1.Name = "Button1"
         Button1.Size = New Size(94, 29)
         Button1.TabIndex = 5
@@ -101,7 +104,7 @@ Partial Class Form1
         Button2.BackColor = SystemColors.GradientActiveCaption
         Button2.FlatAppearance.BorderSize = 5
         Button2.Font = New Font("Stencil", 10.2F, FontStyle.Bold, GraphicsUnit.Point, CByte(0))
-        Button2.Location = New Point(1161, 532)
+        Button2.Location = New Point(1079, 563)
         Button2.Name = "Button2"
         Button2.Size = New Size(94, 29)
         Button2.TabIndex = 6
@@ -117,6 +120,39 @@ Partial Class Form1
         PictureBox1.TabIndex = 7
         PictureBox1.TabStop = False
         ' 
+        ' CheckBox1
+        ' 
+        CheckBox1.AutoSize = True
+        CheckBox1.BackColor = SystemColors.GradientActiveCaption
+        CheckBox1.Location = New Point(979, 509)
+        CheckBox1.Name = "CheckBox1"
+        CheckBox1.Size = New Size(132, 24)
+        CheckBox1.TabIndex = 8
+        CheckBox1.Text = "Show Password"
+        CheckBox1.UseVisualStyleBackColor = False
+        ' 
+        ' RadioButton1
+        ' 
+        RadioButton1.AutoSize = True
+        RadioButton1.Location = New Point(882, 280)
+        RadioButton1.Name = "RadioButton1"
+        RadioButton1.Size = New Size(79, 24)
+        RadioButton1.TabIndex = 9
+        RadioButton1.TabStop = True
+        RadioButton1.Text = "ADMIN"
+        RadioButton1.UseVisualStyleBackColor = True
+        ' 
+        ' RadioButton2
+        ' 
+        RadioButton2.AutoSize = True
+        RadioButton2.Location = New Point(1052, 280)
+        RadioButton2.Name = "RadioButton2"
+        RadioButton2.Size = New Size(69, 24)
+        RadioButton2.TabIndex = 10
+        RadioButton2.TabStop = True
+        RadioButton2.Text = "STAFF"
+        RadioButton2.UseVisualStyleBackColor = True
+        ' 
         ' Form1
         ' 
         AutoScaleDimensions = New SizeF(8F, 20F)
@@ -124,7 +160,10 @@ Partial Class Form1
         BackColor = SystemColors.ButtonHighlight
         BackgroundImage = CType(resources.GetObject("$this.BackgroundImage"), Image)
         BackgroundImageLayout = ImageLayout.None
-        ClientSize = New Size(1836, 853)
+        ClientSize = New Size(1838, 862)
+        Controls.Add(RadioButton2)
+        Controls.Add(RadioButton1)
+        Controls.Add(CheckBox1)
         Controls.Add(Button2)
         Controls.Add(Button1)
         Controls.Add(TextBox2)
@@ -148,4 +187,7 @@ Partial Class Form1
     Friend WithEvents Button1 As Button
     Friend WithEvents Button2 As Button
     Friend WithEvents PictureBox1 As PictureBox
+    Friend WithEvents CheckBox1 As CheckBox
+    Friend WithEvents RadioButton1 As RadioButton
+    Friend WithEvents RadioButton2 As RadioButton
 End Class

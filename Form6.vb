@@ -1,119 +1,171 @@
 ﻿Imports System.Data.SqlClient
 
 Public Class form6
-
     Dim con As New SqlConnection("Data Source=DIYA_S\SQLEXPRESS;Initial Catalog=AMDB;Integrated Security=True")
 
-    ' Load Supplier data on form load
-    Private Sub formSupplier_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        LoadSuppliers()
-
-
-    End Sub
-
-    ' Load suppliers from database
+    ' Load suppliers into DataGridView
     Private Sub LoadSuppliers()
-
-        Try
-            ' Automatically opens and closes the connection
-            Using con As New SqlConnection("Data Source=DIYA_S\SQLEXPRESS;Initial Catalog=AMDB;Integrated Security=True")
-                Dim da As New SqlDataAdapter("SELECT * FROM Supplierss", con)
-                Dim dt As New DataTable()
-                da.Fill(dt)
-                DataGridView1.DataSource = dt
-            End Using
-        Catch ex As Exception
-            MessageBox.Show("Error loading suppliers: " & ex.Message)
-        End Try
+        Dim cmd As New SqlCommand("SELECT * FROM Supplierss", con)
+        Dim da As New SqlDataAdapter(cmd)
+        Dim dt As New DataTable()
+        da.Fill(dt)
+        DataGridView1.DataSource = dt
     End Sub
 
+    ' Auto-populate fields when Supplier ID is entered
+    Private Sub AutoPopulateFields(supplierId As Integer)
+        Dim cmd As New SqlCommand("SELECT * FROM Supplierss WHERE SupplierID = @id", con)
+        cmd.Parameters.AddWithValue("@id", supplierId)
+        Dim da As New SqlDataAdapter(cmd)
+        Dim dt As New DataTable()
+        da.Fill(dt)
 
-    ' Add new supplier
-    Private Sub button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        If TextBox2.Text = "" Or TextBox3.Text = "" Then
-            MessageBox.Show("Please enter required fields: Name and Email.")
-            Exit Sub
+        If dt.Rows.Count > 0 Then
+            TextBox1.Text = dt.Rows(0)("SupplierID").ToString()
+            TextBox2.Text = dt.Rows(0)("SupplierName").ToString()
+            TextBox3.Text = dt.Rows(0)("ContactInfo").ToString()
+            TextBox4.Text = dt.Rows(0)("SupplierEmail").ToString()
+            TextBox5.Text = dt.Rows(0)("SupplierAddress").ToString()
+            ComboBox1.Text = dt.Rows(0)("SupplierStatus").ToString()
         End If
+    End Sub
 
-        Try
-            Using con As New SqlConnection("Data Source=DIYA_S\SQLEXPRESS;Initial Catalog=AMDB;Integrated Security=True")
-                con.Open()
-                Dim cmd As New SqlCommand("INSERT INTO Supplierss (SupplierName, ContactNumber, Email, Address) 
-                                       VALUES (@SupplierName, @ContactNumber, @Email, @Address)", con)
-                cmd.Parameters.AddWithValue("@SupplierName", TextBox2.Text)
-                cmd.Parameters.AddWithValue("@ContactNumber", TextBox3.Text)
-                cmd.Parameters.AddWithValue("@Email", TextBox4.Text)
-                cmd.Parameters.AddWithValue("@Address", TextBox5.Text)
-                cmd.ExecuteNonQuery()
-            End Using
+    ' Form Load
+    Private Sub SupplierManagementForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
-            MessageBox.Show("Supplier added successfully!")
-            LoadSuppliers()
-            ClearFields()
+        ' Load status options
+        ComboBox1.Items.Clear()
+        ComboBox1.Items.Add("Active")
+        ComboBox1.Items.Add("Inactive")
 
-        Catch ex As Exception
-            MessageBox.Show("Error adding supplier: " & ex.Message)
-        End Try
+        ' Load supplier data
+        LoadSuppliers()
     End Sub
 
 
-    ' Update existing supplier
-    Private Sub button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
-        If TextBox1.Text = "" Then
-            MessageBox.Show("Please select a supplier to update.")
-            Exit Sub
-        End If
 
-        Try
-            con.Open()
-            Dim cmd As New SqlCommand("UPDATE Supplierss SET SupplierName=@SupplierName, 
-                                       ContactNumber=@ContactNumber, Email=@Email, Address=@Address 
-                                       WHERE SupplierID=@SupplierID", con)
-            cmd.Parameters.AddWithValue("@SupplierID", TextBox1.Text)
-            cmd.Parameters.AddWithValue("@SupplierName", TextBox2.Text)
-            cmd.Parameters.AddWithValue("@ContactNumber", TextBox3.Text)
-            cmd.Parameters.AddWithValue("@Email", TextBox4.Text)
-            cmd.Parameters.AddWithValue("@Address", TextBox5.Text)
-
-            cmd.ExecuteNonQuery()
-            MessageBox.Show("Supplier updated successfully!")
-
-            LoadSuppliers()
-            ClearFields()
-        Catch ex As Exception
-            MessageBox.Show("Error updating supplier: " & ex.Message)
-        Finally
-            con.Close()
-        End Try
+    ' Add Supplier
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        If con.State = ConnectionState.Closed Then con.Open()
+        Dim query As String = "INSERT INTO Supplierss (SupplierName, ContactInfo, SupplierEmail, SupplierAddress, SupplierStatus) VALUES (@name, @contact, @email, @address, @status)"
+        Dim cmd As New SqlCommand(query, con)
+        cmd.Parameters.AddWithValue("@name", TextBox2.Text)
+        cmd.Parameters.AddWithValue("@contact", TextBox3.Text)
+        cmd.Parameters.AddWithValue("@email", TextBox4.Text)
+        cmd.Parameters.AddWithValue("@address", TextBox5.Text)
+        cmd.Parameters.AddWithValue("@status", ComboBox1.Text)
+        cmd.ExecuteNonQuery()
+        MessageBox.Show("Supplier added successfully")
+        LoadSuppliers()
+        ClearFields()
+        con.Close()
     End Sub
 
-    ' Clear all input fields
-    Private Sub button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
+    ' Edit Supplier
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+        If con.State = ConnectionState.Closed Then con.Open()
+        Dim query As String = "UPDATE Supplierss SET SupplierName=@name, ContactInfo=@contact, SupplierEmail=@email, SupplierAddress=@address, SupplierStatus=@status WHERE SupplierID=@id"
+        Dim cmd As New SqlCommand(query, con)
+        cmd.Parameters.AddWithValue("@id", TextBox1.Text)
+        cmd.Parameters.AddWithValue("@name", TextBox2.Text)
+        cmd.Parameters.AddWithValue("@contact", TextBox3.Text)
+        cmd.Parameters.AddWithValue("@email", TextBox4.Text)
+        cmd.Parameters.AddWithValue("@address", TextBox5.Text)
+        cmd.Parameters.AddWithValue("@status", ComboBox1.Text)
+        cmd.ExecuteNonQuery()
+        MessageBox.Show("Supplier updated successfully")
+        LoadSuppliers()
+        ClearFields()
+        con.Close()
+    End Sub
+
+    ' Delete Supplier
+    Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
+        If con.State = ConnectionState.Closed Then con.Open()
+        Dim query As String = "DELETE FROM Supplierss WHERE SupplierID=@id"
+        Dim cmd As New SqlCommand(query, con)
+        cmd.Parameters.AddWithValue("@id", TextBox1.Text)
+        cmd.ExecuteNonQuery()
+        MessageBox.Show("Supplier deleted successfully")
+        LoadSuppliers()
+        ClearFields()
+        con.Close()
+    End Sub
+
+    ' Clear fields
+    Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
         ClearFields()
     End Sub
 
-    Private Sub ClearFields()
-        TextBox2.Clear()
-        TextBox3.Clear()
-        TextBox4.Clear()
-        TextBox5.Clear()
+    ' Live Search: Triggered on TextChanged event of the search TextBox
+    Private Sub TextBox6_TextChanged(sender As Object, e As EventArgs) Handles TextBox6.TextChanged
+        Dim cmd As New SqlCommand("SELECT * FROM Supplierss WHERE SupplierName LIKE @search OR SupplierID LIKE @search", con)
+        cmd.Parameters.AddWithValue("@search", "%" & TextBox6.Text & "%")
+        Dim da As New SqlDataAdapter(cmd)
+        Dim dt As New DataTable()
+        da.Fill(dt)
+        DataGridView1.DataSource = dt
     End Sub
 
-    Private Sub btnClear_Click(sender As Object, e As EventArgs) Handles Button4.Click
+    ' Reset fields
+    Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
+        LoadSuppliers()
         ClearFields()
     End Sub
 
-
-    ' Populate fields when a row is selected from DataGridView
+    ' Populate fields on row click
     Private Sub DataGridView1_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles DataGridView1.CellClick
         If e.RowIndex >= 0 Then
             Dim row As DataGridViewRow = DataGridView1.Rows(e.RowIndex)
             TextBox1.Text = row.Cells("SupplierID").Value.ToString()
             TextBox2.Text = row.Cells("SupplierName").Value.ToString()
-            TextBox3.Text = row.Cells("ContactNumber").Value.ToString()
-            TextBox4.Text = row.Cells("Email").Value.ToString()
-            TextBox5.Text = row.Cells("Address").Value.ToString()
+            TextBox3.Text = row.Cells("ContactInfo").Value.ToString()
+            TextBox4.Text = row.Cells("SupplierEmail").Value.ToString()
+            TextBox5.Text = row.Cells("SupplierAddress").Value.ToString()
+            ComboBox1.Text = row.Cells("SupplierStatus").Value.ToString()
         End If
     End Sub
 
+    ' Highlight inactive suppliers
+    Private Sub HighlightInactiveSuppliers()
+        For Each row As DataGridViewRow In DataGridView1.Rows
+            If row.Cells("SupplierStatus").Value IsNot Nothing AndAlso row.Cells("SupplierStatus").Value.ToString() = "Inactive" Then
+                row.DefaultCellStyle.BackColor = Color.LightSalmon
+            End If
+        Next
+    End Sub
+
+    ' Auto Populate Supplier Info when Supplier ID is entered
+    Private Sub TextBox1_TextChanged(sender As Object, e As EventArgs) Handles TextBox1.TextChanged
+        If Integer.TryParse(TextBox1.Text, 0) Then
+            AutoPopulateFields(Convert.ToInt32(TextBox1.Text))
+        End If
+    End Sub
+
+    ' Clear all fields
+    Private Sub ClearFields()
+        TextBox1.Clear()
+        TextBox2.Clear()
+        TextBox3.Clear()
+        TextBox4.Clear()
+        TextBox5.Clear()
+        ComboBox1.SelectedIndex = -1
+        TextBox6.Clear()
+    End Sub
+
+
+
+
+    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
+        Me.Hide()
+
+        If Module1.LoggedInRole = "Admin" Then
+            form2.Show()
+        ElseIf Module1.LoggedInRole.ToLower() = "staff" Then
+            Form9.Show()
+        Else
+            MessageBox.Show("Unknown user role. Cannot navigate.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Me.Show() ' Optional: Show this form again if role is invalid
+        End If
+    End Sub
 End Class

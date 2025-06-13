@@ -33,6 +33,7 @@ Partial Class Form2
         Button1 = New Button()
         PictureBox1 = New PictureBox()
         PictureBox2 = New PictureBox()
+        Button8 = New Button()
         CType(PictureBox1, ComponentModel.ISupportInitialize).BeginInit()
         CType(PictureBox2, ComponentModel.ISupportInitialize).BeginInit()
         SuspendLayout()
@@ -144,12 +145,24 @@ Partial Class Form2
         ' 
         PictureBox2.BackColor = Color.GhostWhite
         PictureBox2.BackgroundImage = CType(resources.GetObject("PictureBox2.BackgroundImage"), Image)
-        PictureBox2.BackgroundImageLayout = ImageLayout.Center
-        PictureBox2.Location = New Point(1077, 533)
+        PictureBox2.BackgroundImageLayout = ImageLayout.Zoom
+        PictureBox2.Location = New Point(709, 212)
         PictureBox2.Name = "PictureBox2"
-        PictureBox2.Size = New Size(666, 359)
+        PictureBox2.Size = New Size(850, 477)
         PictureBox2.TabIndex = 11
         PictureBox2.TabStop = False
+        ' 
+        ' Button8
+        ' 
+        Button8.BackColor = Color.MediumPurple
+        Button8.Font = New Font("Segoe UI", 9F, FontStyle.Bold)
+        Button8.ForeColor = SystemColors.ButtonHighlight
+        Button8.Location = New Point(1077, 598)
+        Button8.Name = "Button8"
+        Button8.Size = New Size(94, 29)
+        Button8.TabIndex = 13
+        Button8.Text = "LOGOUT"
+        Button8.UseVisualStyleBackColor = False
         ' 
         ' form2
         ' 
@@ -157,7 +170,8 @@ Partial Class Form2
         AutoScaleMode = AutoScaleMode.Font
         BackColor = SystemColors.ButtonHighlight
         BackgroundImageLayout = ImageLayout.Stretch
-        ClientSize = New Size(1741, 864)
+        ClientSize = New Size(1838, 862)
+        Controls.Add(Button8)
         Controls.Add(PictureBox1)
         Controls.Add(Button1)
         Controls.Add(Label3)
@@ -185,4 +199,5 @@ Partial Class Form2
     Friend WithEvents Button1 As Button
     Friend WithEvents PictureBox1 As PictureBox
     Friend WithEvents PictureBox2 As PictureBox
+    Friend WithEvents Button8 As Button
 End Class
