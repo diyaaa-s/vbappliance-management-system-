@@ -23,177 +23,229 @@ Partial Class Form3
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Form3))
-        BtnAdd = New Button()
-        BtnUpdate = New Button()
-        BtnDelete = New Button()
-        BtnBack = New Button()
+        Label1 = New Label()
         Label2 = New Label()
         Label3 = New Label()
         Label4 = New Label()
         Label5 = New Label()
-        TxtPrice = New TextBox()
-        TxtStock = New TextBox()
-        TxtProductID = New TextBox()
-        TxtProductName = New TextBox()
         Label6 = New Label()
-        CmbCategory = New ComboBox()
+        TextBox1 = New TextBox()
+        ComboBox1 = New ComboBox()
+        ComboBox2 = New ComboBox()
+        TextBox2 = New TextBox()
+        TextBox3 = New TextBox()
+        TextBox4 = New TextBox()
+        Button1 = New Button()
+        Button2 = New Button()
+        Button4 = New Button()
+        Label7 = New Label()
+        TextBox5 = New TextBox()
+        Button5 = New Button()
         DataGridView1 = New DataGridView()
+        Button6 = New Button()
+        Button7 = New Button()
         PictureBox1 = New PictureBox()
         CType(DataGridView1, ComponentModel.ISupportInitialize).BeginInit()
         CType(PictureBox1, ComponentModel.ISupportInitialize).BeginInit()
         SuspendLayout()
         ' 
-        ' BtnAdd
+        ' Label1
         ' 
-        BtnAdd.BackColor = Color.Transparent
-        BtnAdd.Font = New Font("Segoe UI", 9F, FontStyle.Bold)
-        BtnAdd.ForeColor = SystemColors.ControlText
-        BtnAdd.Location = New Point(478, 431)
-        BtnAdd.Name = "BtnAdd"
-        BtnAdd.Size = New Size(94, 29)
-        BtnAdd.TabIndex = 2
-        BtnAdd.Text = "Add"
-        BtnAdd.UseVisualStyleBackColor = False
-        ' 
-        ' BtnUpdate
-        ' 
-        BtnUpdate.BackColor = Color.Transparent
-        BtnUpdate.Font = New Font("Segoe UI", 9F, FontStyle.Bold)
-        BtnUpdate.Location = New Point(710, 419)
-        BtnUpdate.Name = "BtnUpdate"
-        BtnUpdate.Size = New Size(94, 29)
-        BtnUpdate.TabIndex = 3
-        BtnUpdate.Text = "Update"
-        BtnUpdate.UseVisualStyleBackColor = False
-        ' 
-        ' BtnDelete
-        ' 
-        BtnDelete.Font = New Font("Segoe UI", 9F, FontStyle.Bold)
-        BtnDelete.Location = New Point(933, 410)
-        BtnDelete.Name = "BtnDelete"
-        BtnDelete.Size = New Size(94, 29)
-        BtnDelete.TabIndex = 4
-        BtnDelete.Text = "Delete"
-        BtnDelete.UseVisualStyleBackColor = True
-        ' 
-        ' BtnBack
-        ' 
-        BtnBack.Font = New Font("Segoe UI", 9F, FontStyle.Bold)
-        BtnBack.Location = New Point(1124, 410)
-        BtnBack.Name = "BtnBack"
-        BtnBack.Size = New Size(94, 29)
-        BtnBack.TabIndex = 5
-        BtnBack.Text = "Back"
-        BtnBack.UseVisualStyleBackColor = True
+        Label1.AutoSize = True
+        Label1.Font = New Font("Microsoft YaHei", 7.8F, FontStyle.Bold)
+        Label1.Location = New Point(407, 287)
+        Label1.Name = "Label1"
+        Label1.Size = New Size(97, 19)
+        Label1.TabIndex = 19
+        Label1.Text = "PRODUCT ID "
         ' 
         ' Label2
         ' 
         Label2.AutoSize = True
-        Label2.BackColor = Color.Transparent
-        Label2.Font = New Font("Segoe UI", 9F, FontStyle.Bold)
-        Label2.Location = New Point(642, 581)
+        Label2.Font = New Font("Microsoft YaHei", 7.8F, FontStyle.Bold)
+        Label2.Location = New Point(407, 344)
         Label2.Name = "Label2"
-        Label2.Size = New Size(103, 20)
-        Label2.TabIndex = 7
-        Label2.Text = "PRODUCT ID "
+        Label2.Size = New Size(72, 19)
+        Label2.TabIndex = 20
+        Label2.Text = "SUPPLIER"
         ' 
         ' Label3
         ' 
         Label3.AutoSize = True
-        Label3.BackColor = Color.Transparent
-        Label3.Font = New Font("Segoe UI", 9F, FontStyle.Bold)
-        Label3.Location = New Point(625, 521)
+        Label3.Font = New Font("Microsoft YaHei", 7.8F, FontStyle.Bold)
+        Label3.Location = New Point(407, 390)
         Label3.Name = "Label3"
-        Label3.Size = New Size(132, 20)
-        Label3.TabIndex = 8
-        Label3.Text = "PRODUCT NAME "
+        Label3.Size = New Size(50, 19)
+        Label3.TabIndex = 21
+        Label3.Text = "NAME"
         ' 
         ' Label4
         ' 
         Label4.AutoSize = True
-        Label4.BackColor = Color.Transparent
-        Label4.Font = New Font("Segoe UI", 9F, FontStyle.Bold)
-        Label4.Location = New Point(648, 710)
+        Label4.Font = New Font("Microsoft YaHei", 7.8F, FontStyle.Bold)
+        Label4.Location = New Point(407, 444)
         Label4.Name = "Label4"
-        Label4.Size = New Size(50, 20)
-        Label4.TabIndex = 9
-        Label4.Text = "PRICE"
+        Label4.Size = New Size(81, 19)
+        Label4.TabIndex = 22
+        Label4.Text = "CATEGORY"
         ' 
         ' Label5
         ' 
         Label5.AutoSize = True
-        Label5.BackColor = Color.Transparent
-        Label5.Font = New Font("Segoe UI", 9F, FontStyle.Bold)
-        Label5.Location = New Point(642, 646)
+        Label5.Font = New Font("Microsoft YaHei", 7.8F, FontStyle.Bold)
+        Label5.Location = New Point(407, 513)
         Label5.Name = "Label5"
-        Label5.Size = New Size(55, 20)
-        Label5.TabIndex = 10
-        Label5.Text = "STOCK"
-        ' 
-        ' TxtPrice
-        ' 
-        TxtPrice.Location = New Point(826, 707)
-        TxtPrice.Name = "TxtPrice"
-        TxtPrice.Size = New Size(125, 27)
-        TxtPrice.TabIndex = 11
-        ' 
-        ' TxtStock
-        ' 
-        TxtStock.Location = New Point(826, 643)
-        TxtStock.Name = "TxtStock"
-        TxtStock.Size = New Size(125, 27)
-        TxtStock.TabIndex = 12
-        ' 
-        ' TxtProductID
-        ' 
-        TxtProductID.Location = New Point(826, 574)
-        TxtProductID.Name = "TxtProductID"
-        TxtProductID.Size = New Size(125, 27)
-        TxtProductID.TabIndex = 13
-        ' 
-        ' TxtProductName
-        ' 
-        TxtProductName.BackColor = Color.FloralWhite
-        TxtProductName.Location = New Point(826, 518)
-        TxtProductName.Name = "TxtProductName"
-        TxtProductName.Size = New Size(125, 27)
-        TxtProductName.TabIndex = 14
+        Label5.Size = New Size(47, 19)
+        Label5.TabIndex = 23
+        Label5.Text = "PRICE"
         ' 
         ' Label6
         ' 
         Label6.AutoSize = True
-        Label6.BackColor = Color.Transparent
-        Label6.Font = New Font("Segoe UI", 9F, FontStyle.Bold)
-        Label6.Location = New Point(648, 778)
+        Label6.Font = New Font("Microsoft YaHei", 7.8F, FontStyle.Bold)
+        Label6.Location = New Point(378, 589)
         Label6.Name = "Label6"
-        Label6.Size = New Size(86, 20)
-        Label6.TabIndex = 15
-        Label6.Text = "CATEGORY"
+        Label6.Size = New Size(128, 19)
+        Label6.TabIndex = 24
+        Label6.Text = "STOCK QUANTITY"
         ' 
-        ' CmbCategory
+        ' TextBox1
         ' 
-        CmbCategory.FormattingEnabled = True
-        CmbCategory.Location = New Point(826, 770)
-        CmbCategory.Name = "CmbCategory"
-        CmbCategory.Size = New Size(151, 28)
-        CmbCategory.TabIndex = 16
+        TextBox1.Location = New Point(581, 284)
+        TextBox1.Name = "TextBox1"
+        TextBox1.Size = New Size(125, 27)
+        TextBox1.TabIndex = 25
+        ' 
+        ' ComboBox1
+        ' 
+        ComboBox1.FormattingEnabled = True
+        ComboBox1.Location = New Point(581, 341)
+        ComboBox1.Name = "ComboBox1"
+        ComboBox1.Size = New Size(125, 28)
+        ComboBox1.TabIndex = 26
+        ' 
+        ' ComboBox2
+        ' 
+        ComboBox2.FormattingEnabled = True
+        ComboBox2.Location = New Point(581, 441)
+        ComboBox2.Name = "ComboBox2"
+        ComboBox2.Size = New Size(125, 28)
+        ComboBox2.TabIndex = 27
+        ' 
+        ' TextBox2
+        ' 
+        TextBox2.Location = New Point(581, 390)
+        TextBox2.Name = "TextBox2"
+        TextBox2.Size = New Size(125, 27)
+        TextBox2.TabIndex = 28
+        ' 
+        ' TextBox3
+        ' 
+        TextBox3.Location = New Point(581, 513)
+        TextBox3.Name = "TextBox3"
+        TextBox3.Size = New Size(125, 27)
+        TextBox3.TabIndex = 29
+        ' 
+        ' TextBox4
+        ' 
+        TextBox4.Location = New Point(581, 589)
+        TextBox4.Name = "TextBox4"
+        TextBox4.Size = New Size(125, 27)
+        TextBox4.TabIndex = 30
+        ' 
+        ' Button1
+        ' 
+        Button1.Font = New Font("Microsoft YaHei", 7.8F, FontStyle.Bold)
+        Button1.Location = New Point(207, 664)
+        Button1.Name = "Button1"
+        Button1.Size = New Size(94, 29)
+        Button1.TabIndex = 31
+        Button1.Text = "ADD"
+        Button1.UseVisualStyleBackColor = True
+        ' 
+        ' Button2
+        ' 
+        Button2.Font = New Font("Microsoft YaHei", 7.8F, FontStyle.Bold)
+        Button2.Location = New Point(378, 664)
+        Button2.Name = "Button2"
+        Button2.Size = New Size(94, 29)
+        Button2.TabIndex = 32
+        Button2.Text = "EDIT"
+        Button2.UseVisualStyleBackColor = True
+        ' 
+        ' Button4
+        ' 
+        Button4.Font = New Font("Microsoft YaHei", 7.8F, FontStyle.Bold)
+        Button4.Location = New Point(594, 664)
+        Button4.Name = "Button4"
+        Button4.Size = New Size(94, 29)
+        Button4.TabIndex = 34
+        Button4.Text = "CLEAR"
+        Button4.UseVisualStyleBackColor = True
+        ' 
+        ' Label7
+        ' 
+        Label7.AutoSize = True
+        Label7.Font = New Font("Microsoft YaHei", 7.8F, FontStyle.Bold)
+        Label7.Location = New Point(779, 281)
+        Label7.Name = "Label7"
+        Label7.Size = New Size(118, 19)
+        Label7.TabIndex = 35
+        Label7.Text = "Search By Name"
+        ' 
+        ' TextBox5
+        ' 
+        TextBox5.Font = New Font("Microsoft YaHei", 7.8F, FontStyle.Bold)
+        TextBox5.Location = New Point(920, 279)
+        TextBox5.Name = "TextBox5"
+        TextBox5.Size = New Size(125, 25)
+        TextBox5.TabIndex = 36
+        ' 
+        ' Button5
+        ' 
+        Button5.Font = New Font("Microsoft YaHei", 7.8F, FontStyle.Bold)
+        Button5.Location = New Point(1051, 279)
+        Button5.Name = "Button5"
+        Button5.Size = New Size(94, 29)
+        Button5.TabIndex = 37
+        Button5.Text = "SEARCH"
+        Button5.UseVisualStyleBackColor = True
         ' 
         ' DataGridView1
         ' 
-        DataGridView1.BackgroundColor = Color.White
         DataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        DataGridView1.Location = New Point(1092, 525)
+        DataGridView1.Location = New Point(791, 329)
         DataGridView1.Name = "DataGridView1"
         DataGridView1.RowHeadersWidth = 51
-        DataGridView1.Size = New Size(300, 188)
-        DataGridView1.TabIndex = 17
+        DataGridView1.Size = New Size(751, 307)
+        DataGridView1.TabIndex = 38
+        ' 
+        ' Button6
+        ' 
+        Button6.Font = New Font("Microsoft YaHei", 7.8F, FontStyle.Bold)
+        Button6.Location = New Point(1151, 279)
+        Button6.Name = "Button6"
+        Button6.Size = New Size(94, 29)
+        Button6.TabIndex = 39
+        Button6.Text = "RESET"
+        Button6.UseVisualStyleBackColor = True
+        ' 
+        ' Button7
+        ' 
+        Button7.Font = New Font("Microsoft YaHei", 7.8F, FontStyle.Bold)
+        Button7.Location = New Point(761, 664)
+        Button7.Name = "Button7"
+        Button7.Size = New Size(94, 29)
+        Button7.TabIndex = 40
+        Button7.Text = "BACK"
+        Button7.UseVisualStyleBackColor = True
         ' 
         ' PictureBox1
         ' 
         PictureBox1.BackgroundImage = CType(resources.GetObject("PictureBox1.BackgroundImage"), Image)
-        PictureBox1.Location = New Point(-2, 1)
+        PictureBox1.Location = New Point(-88, -88)
         PictureBox1.Name = "PictureBox1"
-        PictureBox1.Size = New Size(1858, 288)
+        PictureBox1.Size = New Size(1858, 280)
         PictureBox1.TabIndex = 18
         PictureBox1.TabStop = False
         ' 
@@ -203,23 +255,29 @@ Partial Class Form3
         AutoScaleMode = AutoScaleMode.Font
         BackgroundImage = CType(resources.GetObject("$this.BackgroundImage"), Image)
         BackgroundImageLayout = ImageLayout.Stretch
-        ClientSize = New Size(1839, 855)
-        Controls.Add(PictureBox1)
+        ClientSize = New Size(1838, 862)
+        Controls.Add(Button7)
+        Controls.Add(Button6)
         Controls.Add(DataGridView1)
-        Controls.Add(CmbCategory)
+        Controls.Add(Button5)
+        Controls.Add(TextBox5)
+        Controls.Add(Label7)
+        Controls.Add(Button4)
+        Controls.Add(Button2)
+        Controls.Add(Button1)
+        Controls.Add(TextBox4)
+        Controls.Add(TextBox3)
+        Controls.Add(TextBox2)
+        Controls.Add(ComboBox2)
+        Controls.Add(ComboBox1)
+        Controls.Add(TextBox1)
         Controls.Add(Label6)
-        Controls.Add(TxtProductName)
-        Controls.Add(TxtProductID)
-        Controls.Add(TxtStock)
-        Controls.Add(TxtPrice)
         Controls.Add(Label5)
         Controls.Add(Label4)
         Controls.Add(Label3)
         Controls.Add(Label2)
-        Controls.Add(BtnBack)
-        Controls.Add(BtnDelete)
-        Controls.Add(BtnUpdate)
-        Controls.Add(BtnAdd)
+        Controls.Add(Label1)
+        Controls.Add(PictureBox1)
         DoubleBuffered = True
         Name = "Form3"
         Text = "Form3"
@@ -228,20 +286,26 @@ Partial Class Form3
         ResumeLayout(False)
         PerformLayout()
     End Sub
-    Friend WithEvents BtnAdd As Button
-    Friend WithEvents BtnUpdate As Button
-    Friend WithEvents BtnDelete As Button
-    Friend WithEvents BtnBack As Button
+    Friend WithEvents Label1 As Label
     Friend WithEvents Label2 As Label
     Friend WithEvents Label3 As Label
     Friend WithEvents Label4 As Label
     Friend WithEvents Label5 As Label
-    Friend WithEvents TxtPrice As TextBox
-    Friend WithEvents TxtStock As TextBox
-    Friend WithEvents TxtProductID As TextBox
-    Friend WithEvents TxtProductName As TextBox
     Friend WithEvents Label6 As Label
-    Friend WithEvents CmbCategory As ComboBox
+    Friend WithEvents TextBox1 As TextBox
+    Friend WithEvents ComboBox1 As ComboBox
+    Friend WithEvents ComboBox2 As ComboBox
+    Friend WithEvents TextBox2 As TextBox
+    Friend WithEvents TextBox3 As TextBox
+    Friend WithEvents TextBox4 As TextBox
+    Friend WithEvents Button1 As Button
+    Friend WithEvents Button2 As Button
+    Friend WithEvents Button4 As Button
+    Friend WithEvents Label7 As Label
+    Friend WithEvents TextBox5 As TextBox
+    Friend WithEvents Button5 As Button
     Friend WithEvents DataGridView1 As DataGridView
+    Friend WithEvents Button6 As Button
+    Friend WithEvents Button7 As Button
     Friend WithEvents PictureBox1 As PictureBox
 End Class

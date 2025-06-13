@@ -54,4 +54,16 @@ Public Class form2
     Private Sub PictureBox2_Click_1(sender As Object, e As EventArgs) Handles PictureBox2.Click
 
     End Sub
+
+    Private Sub Button7_Click(sender As Object, e As EventArgs)
+        Form1.Show
+        Hide
+
+    End Sub
+
+    Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
+        Me.Hide()
+        Form1.Show()
+
+    End Sub
 End Class

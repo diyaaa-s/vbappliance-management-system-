@@ -1,212 +1,311 @@
 ﻿Imports System.Data.SqlClient
 
-Public Class form4
-
+Public Class Form4
     Dim con As New SqlConnection("Data Source=DIYA_S\SQLEXPRESS;Initial Catalog=AMDB;Integrated Security=True")
+    Dim cmd As SqlCommand
+    Dim da As SqlDataAdapter
+    Dim dt As DataTable
 
-    Private Sub form4_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        LoadCustomers()
-        LoadProducts()
-        LoadOrders()
-        ComboBox3.Items.AddRange(New String() {"Pending", "Completed", "Cancelled"})
-        ComboBox4.Items.AddRange(New String() {"Paid", "Unpaid"})
+    ' Auto-generate Order ID
+    Private Sub GenerateOrderID()
+        con.Open()
+        cmd = New SqlCommand("SELECT ISNULL(MAX(OrderID), 0) + 1 FROM Orderss", con)
+        TextBox1.Text = cmd.ExecuteScalar().ToString()
+        con.Close()
     End Sub
 
-    Private Sub LoadCustomers()
-        ComboBox1.Items.Clear()
-        Try
-            con.Open()
-            Dim cmd As New SqlCommand("SELECT CustomerID, CustomerName FROM Customerss", con)
-            Dim reader = cmd.ExecuteReader()
-            While reader.Read()
-                ComboBox1.Items.Add(New KeyValuePair(Of Integer, String)(reader("CustomerID"), reader("CustomerName").ToString()))
-            End While
-            ComboBox1.DisplayMember = "Value"
-            ComboBox1.ValueMember = "Key"
-        Catch ex As Exception
-            MessageBox.Show("Error loading customers: " & ex.Message)
-        Finally
-            con.Close()
-        End Try
+    ' Load ComboBoxes
+    Private Sub LoadComboBoxes()
+        ' Load Customers
+        con.Open()
+        cmd = New SqlCommand("SELECT CustomerID, CustomerName FROM Customerss", con)
+        da = New SqlDataAdapter(cmd)
+        dt = New DataTable()
+        da.Fill(dt)
+        ComboBox1.DataSource = dt
+        ComboBox1.DisplayMember = "CustomerName"
+        ComboBox1.ValueMember = "CustomerID"
+        ComboBox1.SelectedIndex = -1 ' <-- Prevent default selection
+        con.Close()
+
+        ' Load Products
+        con.Open()
+        cmd = New SqlCommand("SELECT ProductID, ProductName FROM Products", con)
+        da = New SqlDataAdapter(cmd)
+        dt = New DataTable()
+        da.Fill(dt)
+        ComboBox2.DataSource = dt
+        ComboBox2.DisplayMember = "ProductName"
+        ComboBox2.ValueMember = "ProductID"
+        ComboBox2.SelectedIndex = -1 ' <-- Prevent default selection
+        con.Close()
+
+        ' Load Order Status
+        ComboBox3.Items.Clear()
+        ComboBox3.Items.AddRange({"Pending", "Processing", "Delivered"})
+        ComboBox3.SelectedIndex = -1 ' Optional: no default status selected
     End Sub
 
-    Private Sub LoadProducts()
-        ComboBox2.Items.Clear()
-        Try
-            con.Open()
-            Dim cmd As New SqlCommand("SELECT ProductID, ProductName FROM Products", con)
-            Dim reader = cmd.ExecuteReader()
-            While reader.Read()
-                ComboBox2.Items.Add(New KeyValuePair(Of Integer, String)(reader("ProductID"), reader("ProductName").ToString()))
-            End While
-            ComboBox2.DisplayMember = "Value"
-            ComboBox2.ValueMember = "Key"
-        Catch ex As Exception
-            MessageBox.Show("Error loading products: " & ex.Message)
-        Finally
-            con.Close()
-        End Try
-    End Sub
-
+    ' Load all Orders
     Private Sub LoadOrders()
-        Try
-            con.Open()
-            Dim da As New SqlDataAdapter("SELECT * FROM Orderss", con)
-            Dim dt As New DataTable()
-            da.Fill(dt)
-            DataGridView1.DataSource = dt
-        Catch ex As Exception
-            MessageBox.Show("Error loading orders: " & ex.Message)
-        Finally
+
+        If con.State = ConnectionState.Open Then
             con.Close()
-        End Try
+        End If
+        con.Open()
+
+        cmd = New SqlCommand("SELECT o.OrderID, c.CustomerName, p.ProductName, od.Quantity, od.SubTotal AS TotalPrice, o.OrderDate, o.OrderStatus 
+                              FROM Orderss o
+                              JOIN Customerss c ON o.CustomerID = c.CustomerID
+                              JOIN OrderDetailss od ON o.OrderID = od.OrderID
+                              JOIN Products p ON od.ProductID = p.ProductID", con)
+        da = New SqlDataAdapter(cmd)
+        dt = New DataTable()
+        da.Fill(dt)
+        DataGridView1.DataSource = dt
+        con.Close()
     End Sub
 
+    ' Calculate total price
+    Private Sub CalculateTotal()
+        Dim total As Decimal = 0
+
+        If ComboBox2.SelectedValue IsNot Nothing AndAlso IsNumeric(TextBox2.Text) Then
+            Using con As New SqlConnection("Data Source=DIYA_S\SQLEXPRESS;Initial Catalog=AMDB;Integrated Security=True")
+                con.Open()
+                Using cmd As New SqlCommand("SELECT Price FROM Products WHERE ProductID = @pid", con)
+                    cmd.Parameters.AddWithValue("@pid", ComboBox2.SelectedValue)
+
+                    Dim price As Object = cmd.ExecuteScalar()
+                    If price IsNot Nothing AndAlso IsNumeric(price) Then
+                        total = Convert.ToDecimal(price) * Convert.ToDecimal(TextBox2.Text)
+                    End If
+                End Using
+            End Using
+        End If
+
+        TextBox3.Text = total.ToString("0.00")
+    End Sub
+
+
+    ' Add Order
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        If ComboBox1.SelectedItem Is Nothing Or ComboBox2.SelectedItem Is Nothing Then
-            MessageBox.Show("Please select a customer and product.")
+        If TextBox2.Text = "" OrElse CInt(TextBox2.Text) <= 0 Then
+            MessageBox.Show("Enter valid quantity.")
             Exit Sub
         End If
 
-        If Not Integer.TryParse(TextBox2.Text, Nothing) Then
-            MessageBox.Show("Enter a valid quantity.")
-            Exit Sub
-        End If
+        con.Open()
+        ' Insert into Orderss
+        ' Insert into Orderss
+        cmd = New SqlCommand("INSERT INTO Orderss(CustomerID, OrderDate, OrderStatus, TotalPrice) VALUES(@cid, @odate, @status, @total); SELECT SCOPE_IDENTITY();", con)
+        cmd.Parameters.AddWithValue("@cid", ComboBox1.SelectedValue)
+        cmd.Parameters.AddWithValue("@odate", DateTimePicker1.Value)
+        cmd.Parameters.AddWithValue("@status", ComboBox3.Text)
+        cmd.Parameters.AddWithValue("@total", TextBox3.Text)
 
-        If Not Decimal.TryParse(TextBox3.Text, Nothing) Then
-            MessageBox.Show("Enter a valid total price.")
-            Exit Sub
-        End If
+        ' Get the newly generated OrderID
+        Dim newOrderID As Integer = Convert.ToInt32(cmd.ExecuteScalar())
+        TextBox1.Text = newOrderID.ToString() ' Optional: update TextBox1 with new OrderID
 
-        Dim customerID = DirectCast(ComboBox1.SelectedItem, KeyValuePair(Of Integer, String)).Key
-        Dim productID = DirectCast(ComboBox2.SelectedItem, KeyValuePair(Of Integer, String)).Key
-        Dim quantity = Integer.Parse(TextBox2.Text)
-        Dim totalPrice = Decimal.Parse(TextBox3.Text)
+        ' Insert into OrderDetailss
+        cmd = New SqlCommand("INSERT INTO OrderDetailss(OrderID, ProductID, Quantity, SubTotal) VALUES(@oid, @pid, @qty, @sub)", con)
+        cmd.Parameters.AddWithValue("@oid", newOrderID)
+        cmd.Parameters.AddWithValue("@pid", ComboBox2.SelectedValue)
+        cmd.Parameters.AddWithValue("@qty", TextBox2.Text)
+        cmd.Parameters.AddWithValue("@sub", TextBox3.Text)
+        cmd.ExecuteNonQuery()
+        con.Close()
 
-        Try
-            con.Open()
+        MessageBox.Show("Order added successfully!")
+        ClearFields()
+        LoadOrders()
+        GenerateOrderID()
 
-            ' Insert into Orderss and get OrderID
-            Dim insertOrder As New SqlCommand("INSERT INTO Orderss (CustomerID, OrderDate, OrderStatus, PaymentStatus, TotalPrice) OUTPUT INSERTED.OrderID VALUES (@CustomerID, @OrderDate, @OrderStatus, @PaymentStatus, @TotalPrice)", con)
-            insertOrder.Parameters.AddWithValue("@CustomerID", customerID)
-            insertOrder.Parameters.AddWithValue("@OrderDate", DateTimePicker1.Value)
-            insertOrder.Parameters.AddWithValue("@OrderStatus", ComboBox3.Text)
-            insertOrder.Parameters.AddWithValue("@PaymentStatus", ComboBox4.Text)
-            insertOrder.Parameters.AddWithValue("@TotalPrice", totalPrice)
-
-            Dim newOrderID = CInt(insertOrder.ExecuteScalar())
-
-            ' Insert into OrderDetailss
-            Dim insertDetail As New SqlCommand("INSERT INTO OrderDetailss (OrderID, ProductID, Quantity, Subtotal) VALUES (@OrderID, @ProductID, @Quantity, @Subtotal)", con)
-            insertDetail.Parameters.AddWithValue("@OrderID", newOrderID)
-            insertDetail.Parameters.AddWithValue("@ProductID", productID)
-            insertDetail.Parameters.AddWithValue("@Quantity", quantity)
-            insertDetail.Parameters.AddWithValue("@Subtotal", totalPrice)
-            insertDetail.ExecuteNonQuery()
-
-            MessageBox.Show("Order added successfully!")
-            LoadOrders()
-            Button4.PerformClick()
-        Catch ex As Exception
-            MessageBox.Show("Error adding order: " & ex.Message)
-        Finally
-            con.Close()
-        End Try
     End Sub
 
+    ' Update Order
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
-        If TextBox1.Text = "" Then
-            MessageBox.Show("Please enter the Order ID to delete.")
-            Exit Sub
-        End If
+        con.Open()
+        ' Update Orderss
+        cmd = New SqlCommand("UPDATE Orderss SET CustomerID=@cid, OrderDate=@odate, OrderStatus=@status, TotalPrice=@total WHERE OrderID=@oid", con)
+        cmd.Parameters.AddWithValue("@cid", ComboBox1.SelectedValue)
+        cmd.Parameters.AddWithValue("@odate", DateTimePicker1.Value)
+        cmd.Parameters.AddWithValue("@status", ComboBox3.Text)
+        cmd.Parameters.AddWithValue("@total", TextBox3.Text)
+        cmd.Parameters.AddWithValue("@oid", TextBox1.Text)
+        cmd.ExecuteNonQuery()
 
-        Try
-            con.Open()
+        ' Update OrderDetailss
+        cmd = New SqlCommand("UPDATE OrderDetailss SET ProductID=@pid, Quantity=@qty, SubTotal=@sub WHERE OrderID=@oid", con)
+        cmd.Parameters.AddWithValue("@pid", ComboBox2.SelectedValue)
+        cmd.Parameters.AddWithValue("@qty", TextBox2.Text)
+        cmd.Parameters.AddWithValue("@sub", TextBox3.Text)
+        cmd.Parameters.AddWithValue("@oid", TextBox1.Text)
+        cmd.ExecuteNonQuery()
+        con.Close()
 
-            ' Delete child records first
-            Dim delDetails As New SqlCommand("DELETE FROM OrderDetailss WHERE OrderID = @OrderID", con)
-            delDetails.Parameters.AddWithValue("@OrderID", TextBox1.Text)
-            delDetails.ExecuteNonQuery()
-
-            ' Delete parent record
-            Dim delOrder As New SqlCommand("DELETE FROM Orderss WHERE OrderID = @OrderID", con)
-            delOrder.Parameters.AddWithValue("@OrderID", TextBox1.Text)
-            delOrder.ExecuteNonQuery()
-
-            MessageBox.Show("Order deleted successfully.")
-            LoadOrders()
-            Button4.PerformClick()
-        Catch ex As Exception
-            MessageBox.Show("Error deleting order: " & ex.Message)
-        Finally
-            con.Close()
-        End Try
+        MessageBox.Show("Order updated!")
+        ClearFields()
+        LoadOrders()
     End Sub
 
+    ' Delete Order
     Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
-        If TextBox1.Text = "" Then
-            MessageBox.Show("Please enter Order ID to update.")
-            Exit Sub
-        End If
+        con.Open()
+        cmd = New SqlCommand("DELETE FROM OrderDetailss WHERE OrderID=@oid", con)
+        cmd.Parameters.AddWithValue("@oid", TextBox1.Text)
+        cmd.ExecuteNonQuery()
 
-        Try
-            Dim customerID = DirectCast(ComboBox1.SelectedItem, KeyValuePair(Of Integer, String)).Key
-            Dim productID = DirectCast(ComboBox2.SelectedItem, KeyValuePair(Of Integer, String)).Key
-            Dim quantity = Integer.Parse(TextBox2.Text)
-            Dim totalPrice = Decimal.Parse(TextBox3.Text)
+        cmd = New SqlCommand("DELETE FROM Orderss WHERE OrderID=@oid", con)
+        cmd.Parameters.AddWithValue("@oid", TextBox1.Text)
+        cmd.ExecuteNonQuery()
+        con.Close()
 
-            con.Open()
-
-            Dim updateOrder As New SqlCommand("UPDATE Orderss SET CustomerID=@CustomerID, OrderDate=@OrderDate, OrderStatus=@OrderStatus, PaymentStatus=@PaymentStatus, TotalPrice=@TotalPrice WHERE OrderID=@OrderID", con)
-            updateOrder.Parameters.AddWithValue("@CustomerID", customerID)
-            updateOrder.Parameters.AddWithValue("@OrderDate", DateTimePicker1.Value)
-            updateOrder.Parameters.AddWithValue("@OrderStatus", ComboBox3.Text)
-            updateOrder.Parameters.AddWithValue("@PaymentStatus", ComboBox4.Text)
-            updateOrder.Parameters.AddWithValue("@TotalPrice", totalPrice)
-            updateOrder.Parameters.AddWithValue("@OrderID", TextBox1.Text)
-            updateOrder.ExecuteNonQuery()
-
-            Dim updateDetails As New SqlCommand("UPDATE OrderDetailss SET ProductID=@ProductID, Quantity=@Quantity, Subtotal=@Subtotal WHERE OrderID=@OrderID", con)
-            updateDetails.Parameters.AddWithValue("@ProductID", productID)
-            updateDetails.Parameters.AddWithValue("@Quantity", quantity)
-            updateDetails.Parameters.AddWithValue("@Subtotal", totalPrice)
-            updateDetails.Parameters.AddWithValue("@OrderID", TextBox1.Text)
-            updateDetails.ExecuteNonQuery()
-
-            MessageBox.Show("Order updated successfully!")
-            LoadOrders()
-            Button4.PerformClick()
-        Catch ex As Exception
-            MessageBox.Show("Error updating order: " & ex.Message)
-        Finally
-            con.Close()
-        End Try
+        MessageBox.Show("Order deleted!")
+        ClearFields()
+        LoadOrders()
+        GenerateOrderID()
     End Sub
 
+    ' Clear Form
     Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
-        TextBox1.Clear()
-        TextBox2.Clear()
-        TextBox3.Clear()
+        ClearFields()
+        GenerateOrderID()
+    End Sub
+
+    ' Clear method
+    Private Sub ClearFields()
         ComboBox1.SelectedIndex = -1
         ComboBox2.SelectedIndex = -1
         ComboBox3.SelectedIndex = -1
-        ComboBox4.SelectedIndex = -1
-        DateTimePicker1.Value = DateTime.Now
+        TextBox2.Clear()
+        TextBox3.Clear()
+        DateTimePicker1.Value = Now
     End Sub
 
+    ' Calculate total on quantity change
+    Private Sub TextBox2_TextChanged(sender As Object, e As EventArgs) Handles TextBox2.TextChanged
+        CalculateTotal()
+    End Sub
+
+    ' Filter by date
     Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
-        Try
-            con.Open()
-            Dim da As New SqlDataAdapter("SELECT * FROM Orderss WHERE OrderID LIKE @search", con)
-            da.SelectCommand.Parameters.AddWithValue("@search", "%" & TextBox4.Text & "%")
-            Dim dt As New DataTable()
-            da.Fill(dt)
-            DataGridView1.DataSource = dt
-        Catch ex As Exception
-            MessageBox.Show("Error searching: " & ex.Message)
-        Finally
-            con.Close()
-        End Try
+        con.Open()
+        cmd = New SqlCommand("SELECT o.OrderID, c.CustomerName, p.ProductName, od.Quantity, od.SubTotal AS TotalPrice, o.OrderDate, o.OrderStatus 
+                              FROM Orderss o
+                              JOIN Customerss c ON o.CustomerID = c.CustomerID
+                              JOIN OrderDetailss od ON o.OrderID = od.OrderID
+                              JOIN Products p ON od.ProductID = p.ProductID
+                              WHERE o.OrderDate BETWEEN @from AND @to", con)
+        cmd.Parameters.AddWithValue("@from", DateTimePicker1.Value)
+        cmd.Parameters.AddWithValue("@to", DateTimePicker2.Value)
+        da = New SqlDataAdapter(cmd)
+        dt = New DataTable()
+        da.Fill(dt)
+        DataGridView1.DataSource = dt
+        con.Close()
     End Sub
 
+    ' Search
+    Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
+        con.Open()
+        cmd = New SqlCommand("SELECT o.OrderID, c.CustomerName, p.ProductName, od.Quantity, od.SubTotal AS TotalPrice, o.OrderDate, o.OrderStatus 
+                              FROM Orderss o
+                              JOIN Customerss c ON o.CustomerID = c.CustomerID
+                              JOIN OrderDetailss od ON o.OrderID = od.OrderID
+                              JOIN Products p ON od.ProductID = p.ProductID
+                              WHERE o.OrderID LIKE @search OR c.CustomerName LIKE @search", con)
+        cmd.Parameters.AddWithValue("@search", "%" & TextBox4.Text & "%")
+        da = New SqlDataAdapter(cmd)
+        dt = New DataTable()
+        da.Fill(dt)
+        DataGridView1.DataSource = dt
+        con.Close()
+    End Sub
+
+    ' Reset
+    Private Sub Button8_Click(sender As Object, e As EventArgs) Handles Button8.Click
+        LoadOrders()
+        TextBox4.Clear()
+    End Sub
+
+    ' Form Load
+    Private Sub Form4_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        LoadComboBoxes()
+        LoadOrders()
+        GenerateOrderID()
+    End Sub
+
+    ' Populate fields on grid click
+    Private Sub DataGridView1_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles DataGridView1.CellClick
+        If e.RowIndex >= 0 Then
+            Dim row As DataGridViewRow = DataGridView1.Rows(e.RowIndex)
+            TextBox1.Text = row.Cells("OrderID").Value.ToString()
+            ComboBox1.Text = row.Cells("CustomerName").Value.ToString()
+            ComboBox2.Text = row.Cells("ProductName").Value.ToString()
+            TextBox2.Text = row.Cells("Quantity").Value.ToString()
+            TextBox3.Text = row.Cells("TotalPrice").Value.ToString()
+            DateTimePicker1.Value = Convert.ToDateTime(row.Cells("OrderDate").Value)
+            ComboBox3.Text = row.Cells("OrderStatus").Value.ToString()
+        End If
+    End Sub
+    Private Sub TextBox1_TextChanged(sender As Object, e As EventArgs) Handles TextBox1.TextChanged
+        If TextBox1.Text <> "" AndAlso IsNumeric(TextBox1.Text) Then
+            If con.State = ConnectionState.Open Then con.Close()
+            con.Open()
+            cmd = New SqlCommand("SELECT o.OrderID, c.CustomerName, p.ProductName, od.Quantity, od.SubTotal AS TotalPrice, o.OrderDate, o.OrderStatus 
+                              FROM Orderss o
+                              JOIN Customerss c ON o.CustomerID = c.CustomerID
+                              JOIN OrderDetailss od ON o.OrderID = od.OrderID
+                              JOIN Products p ON od.ProductID = p.ProductID
+                              WHERE o.OrderID = @oid", con)
+            cmd.Parameters.AddWithValue("@oid", TextBox1.Text)
+            Dim reader As SqlDataReader = cmd.ExecuteReader()
+            If reader.Read() Then
+                ComboBox1.Text = reader("CustomerName").ToString()
+                ComboBox2.Text = reader("ProductName").ToString()
+                TextBox2.Text = reader("Quantity").ToString()
+                TextBox3.Text = reader("TotalPrice").ToString()
+                DateTimePicker1.Value = Convert.ToDateTime(reader("OrderDate"))
+                ComboBox3.Text = reader("OrderStatus").ToString()
+            End If
+            con.Close()
+        End If
+    End Sub
+
+    Private Sub TextBox4_TextChanged(sender As Object, e As EventArgs) Handles TextBox4.TextChanged
+        con.Open()
+        cmd = New SqlCommand("SELECT o.OrderID, c.CustomerName, p.ProductName, od.Quantity, od.SubTotal AS TotalPrice, o.OrderDate, o.OrderStatus 
+                          FROM Orderss o
+                          JOIN Customerss c ON o.CustomerID = c.CustomerID
+                          JOIN OrderDetailss od ON o.OrderID = od.OrderID
+                          JOIN Products p ON od.ProductID = p.ProductID
+                          WHERE o.OrderID LIKE @search OR c.CustomerName LIKE @search", con)
+        cmd.Parameters.AddWithValue("@search", "%" & TextBox4.Text & "%")
+        da = New SqlDataAdapter(cmd)
+        dt = New DataTable()
+        da.Fill(dt)
+        DataGridView1.DataSource = dt
+        con.Close()
+    End Sub
+
+    Private Sub Button9_Click(sender As Object, e As EventArgs) Handles Button9.Click
+        Me.Hide()
+
+        If Module1.LoggedInRole = "Admin" Then
+            form2.Show()
+        ElseIf Module1.LoggedInRole.ToLower() = "staff" Then
+            Form9.Show()
+        Else
+            MessageBox.Show("Unknown user role. Cannot navigate.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Me.Show() ' Optional: Show this form again if role is invalid
+        End If
+    End Sub
+
+    Private Sub Button5_Click(sender As Object, e As EventArgs) Handles Button5.Click
+        Me.Hide()
+        Form8.Show()
+
+    End Sub
 End Class
